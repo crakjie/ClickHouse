@@ -748,10 +748,10 @@ Pipes MergeTreeDataSelectExecutor::spreadMarkRangesAmongStreams(
 
         for (size_t i = 0; i < num_streams; ++i)
         {
-            res.emplace_back(std::make_shared<MergeTreeThreadSelectBlockInputProcessor>(
+            res.push_back({std::make_shared<MergeTreeThreadSelectBlockInputProcessor>(
                 i, pool, min_marks_for_concurrent_read, max_block_size, settings.preferred_block_size_bytes,
                 settings.preferred_max_column_in_block_size_bytes, data, use_uncompressed_cache,
-                query_info.prewhere_info, settings, virt_columns));
+                query_info.prewhere_info, settings, virt_columns)});
 
             if (i == 0)
             {
