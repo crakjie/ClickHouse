@@ -49,6 +49,8 @@ static void validateTree(const Processors & processors, IProcessor * root)
             throw Exception("Processor with name " + node->getName() + " was visited twice while traverse in TreeExecutor. "
                             "Passed processors are not tree.", ErrorCodes::LOGICAL_ERROR);
 
+        is_visited[position] = true;
+
         checkProcessorHasSingleOutput(node);
 
         auto & children = node->getInputs();
