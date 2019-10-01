@@ -634,7 +634,7 @@ Pipes MergeTreeDataSelectExecutor::readFromParts(
         for (auto & pipe : res)
         {
             auto & output = pipe.back()->getOutputs().front();
-            pipe.emplace_back(std::make_shared<FilterTransform>(output.getHeader(), filter_expression, filter_function->getColumnName()), false);
+            pipe.emplace_back(std::make_shared<FilterTransform>(output.getHeader(), filter_expression, filter_function->getColumnName(), false));
             connect(output, pipe.back()->getInputs().front());
         }
     }
