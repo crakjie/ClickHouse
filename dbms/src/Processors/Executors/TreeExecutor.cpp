@@ -74,6 +74,7 @@ void TreeExecutor::init()
     validateTree(processors, root);
 
     port = std::make_unique<InputPort>(getHeader(), root);
+    connect(root->getOutputs().front(), *port);
     port->setNeeded();
 }
 
