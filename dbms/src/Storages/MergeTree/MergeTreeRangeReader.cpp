@@ -703,7 +703,7 @@ void MergeTreeRangeReader::executePrewhereActionsAndFilterColumns(ReadResult & r
         prewhere_column_pos = block.getPositionByName(*prewhere_column_name);
 
         result.columns.clear();
-        result.columns.resize(block.columns());
+        result.columns.reserve(block.columns());
         for (auto & col : block)
             result.columns.emplace_back(std::move(col.column));
 
