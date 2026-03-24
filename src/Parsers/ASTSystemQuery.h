@@ -155,6 +155,8 @@ public:
     void setDatabase(const String & name);
     void setTable(const String & name);
 
+    bool reload_only_invalidated = false;
+
     String target_model;
     String target_function;
     String replica;

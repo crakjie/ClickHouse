@@ -652,7 +652,10 @@ BlockIO InterpreterSystemQuery::execute()
             getContext()->checkAccess(AccessType::SYSTEM_RELOAD_DICTIONARY);
 
             auto & external_dictionaries_loader = system_context->getExternalDictionariesLoader();
-            external_dictionaries_loader.reloadDictionary(query.getTable(), getContext());
+            if (query.reload_only_invalidated)
+                external_dictionaries_loader.reloadDictionaryOnlyIfInvalidated(query.getTable(), getContext());
+            else
+                external_dictionaries_loader.reloadDictionary(query.getTable(), getContext());
 
             ExternalDictionariesLoader::resetAll();
             break;

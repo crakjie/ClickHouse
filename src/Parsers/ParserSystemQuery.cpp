@@ -294,6 +294,8 @@ bool ParserSystemQuery::parseImpl(IParser::Pos & pos, ASTPtr & node, Expected & 
         {
             if (!parseQueryWithOnClusterAndMaybeTable(res, pos, expected, /* require table = */ true, /* allow_string_literal = */ true))
                 return false;
+            if (ParserKeyword{Keyword::INVALIDATED}.ignore(pos, expected))
+                res->reload_only_invalidated = true;
             break;
         }
         case Type::RELOAD_MODEL:

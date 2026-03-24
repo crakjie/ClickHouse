@@ -284,6 +284,9 @@ void ASTSystemQuery::formatImpl(WriteBuffer & ostr, const FormatSettings & setti
                 print_identifier(disk);
             }
 
+            if (reload_only_invalidated)
+                print_keyword(" INVALIDATED");
+
             break;
         }
         case Type::SYNC_DATABASE_REPLICA:

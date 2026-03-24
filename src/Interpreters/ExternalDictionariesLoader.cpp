@@ -144,6 +144,12 @@ void ExternalDictionariesLoader::reloadDictionary(const std::string & dictionary
     loadOrReload(resolved_dictionary_name);
 }
 
+void ExternalDictionariesLoader::reloadDictionaryOnlyIfInvalidated(const std::string & dictionary_name, ContextPtr local_context) const
+{
+    std::string resolved_dictionary_name = resolveDictionaryName(dictionary_name, local_context->getCurrentDatabase());
+    loadOrReloadOnlyIfInvalidated(resolved_dictionary_name);
+}
+
 DictionaryStructure ExternalDictionariesLoader::getDictionaryStructure(const std::string & dictionary_name, ContextPtr query_context) const
 {
     std::string resolved_name = resolveDictionaryName(dictionary_name, query_context->getCurrentDatabase());

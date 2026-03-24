@@ -185,6 +185,13 @@ public:
     template <typename ReturnType = LoadablePtr, typename = std::enable_if_t<is_scalar_load_result_type<ReturnType>, void>> // NOLINT
     ReturnType loadOrReload(const String & name) const;
 
+    /// Reloads a specified object only if the source reports it as invalidated (via invalidate_query).
+    /// Uses the previous version as a base for loading, enabling incremental updates (via update_field).
+    /// If the object is not yet loaded, performs a regular load.
+    /// The function throws an exception if it's failed to reload.
+    template <typename ReturnType = LoadablePtr, typename = std::enable_if_t<is_scalar_load_result_type<ReturnType>, void>> // NOLINT
+    ReturnType loadOrReloadOnlyIfInvalidated(const String & name) const;
+
     /// Loads or reloads objects by filter.
     /// The function reloads the objects which are already loaded.
     /// The function throws an exception if it's failed to load or reload something.

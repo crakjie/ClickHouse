@@ -627,6 +627,38 @@ public:
         return info->getLoadResult<ReturnType>();
     }
 
+    /// Reloads a specified object using the previous version as a base for loading,
+    /// enabling incremental updates via update_field when configured.
+    template <typename ReturnType>
+    ReturnType tryReloadOnlyIfInvalidated(const String & name, Duration timeout)
+    {
+        std::unique_lock lock{mutex};
+        Info * info = getInfo(name);
+        if (!info)
+            return notExists<ReturnType>(name);
+
+        if (!info->loaded())
+        {
+            info = loadImpl(name, timeout, /* forced_to_reload= */ false, lock);
+            if (!info)
+                return notExists<ReturnType>(name);
+            return info->getLoadResult<ReturnType>();
+        }
+
+        /// Already loaded — reload with forced_to_reload=false
+        /// so the previous version is used as base (enabling clone() → updateData()).
+        startLoading(*info, /* forced_to_reload= */ false);
+
+        auto pred = [&] { return !info->isLoading(); };
+
+        if (timeout == WAIT)
+            event.wait(lock, pred);
+        else
+            event.wait_for(lock, timeout, pred);
+
+        return info->getLoadResult<ReturnType>();
+    }
+
     template <typename ReturnType>
     ReturnType tryLoadOrReload(const FilterByNameFunction & filter, Duration timeout)
     {
@@ -1457,6 +1489,15 @@ ReturnType ExternalLoader::loadOrReload(const String & name) const
 }
 
 template <typename ReturnType, typename>
+ReturnType ExternalLoader::loadOrReloadOnlyIfInvalidated(const String & name) const
+{
+    loading_dispatcher->setConfiguration(config_files_reader->read());
+    auto result = loading_dispatcher->tryReloadOnlyIfInvalidated<LoadResult>(name, WAIT);
+    checkLoaded(result, true);
+    return convertTo<ReturnType>(result);
+}
+
+template <typename ReturnType, typename>
 ReturnType ExternalLoader::loadOrReload(const FilterByNameFunction & filter) const
 {
     loading_dispatcher->setConfiguration(config_files_reader->read());
@@ -1586,6 +1627,8 @@ template ExternalLoader::LoadResults ExternalLoader::load<ExternalLoader::LoadRe
 
 template ExternalLoader::LoadablePtr ExternalLoader::loadOrReload<ExternalLoader::LoadablePtr>(const String &) const;
 template ExternalLoader::LoadResult ExternalLoader::loadOrReload<ExternalLoader::LoadResult>(const String &) const;
+template ExternalLoader::LoadablePtr ExternalLoader::loadOrReloadOnlyIfInvalidated<ExternalLoader::LoadablePtr>(const String &) const;
+template ExternalLoader::LoadResult ExternalLoader::loadOrReloadOnlyIfInvalidated<ExternalLoader::LoadResult>(const String &) const;
 template ExternalLoader::Loadables ExternalLoader::loadOrReload<ExternalLoader::Loadables>(const FilterByNameFunction &) const;
 template ExternalLoader::LoadResults ExternalLoader::loadOrReload<ExternalLoader::LoadResults>(const FilterByNameFunction &) const;
 

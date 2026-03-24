@@ -1,0 +1,7 @@
+one
+two
+one_updated
+two
+one_updated
+
+SYSTEM RELOAD DICTIONARY test_dict_invalidated INVALIDATED
